@@ -7,6 +7,21 @@
 
 - include: configure-apache.yml
 
+# Hello World
+- name: Creating Hello World Page on the launched instance
+  copy:
+    content: |
+      <html>
+      <head>
+      <title>Hello World</title>
+      </head>
+      <body>
+      <h1>Hello World!</h1>
+      </body>
+      </html>
+    dest: /var/www/html/index.html
+    mode: 0644
+
 # Security
 
 - include: configure-ufw.yml
