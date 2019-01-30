@@ -5,10 +5,8 @@ def Validate_Card(card):
 	no_four_repeats = r"((\d)-?(?!(-?\2){3})){16}"
 	filters = valid_structure, no_four_repeats
 	if all(re.match(f, card) for f in filters):
-#		print(f"\n{card} is Valid Credit Card")
 		return True
 	else:
-#		print(f"\nSorry, {card} is an Invalid Credit Card, Please Double Check")
 		return False
 
 if __name__ == '__main__':
