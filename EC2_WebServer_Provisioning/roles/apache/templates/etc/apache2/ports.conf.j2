@@ -1,0 +1,11 @@
+# HTTP port
+Listen {{ apache_server_http_port }}
+
+<IfModule ssl_module>
+	# HTTPS port
+	Listen {{ apache_server_https_port }}
+</IfModule>
+
+<IfModule mod_gnutls.c>
+	Listen {{ apache_server_https_port }}
+</IfModule>

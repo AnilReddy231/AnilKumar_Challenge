@@ -1,0 +1,22 @@
+---
+    - name: Security Group Creation for instances that will be provisioning using Ansible
+      ec2_group:
+        name: "scg-ansible"
+        vpc_id: "{{ vpc_id }}"
+        description: "Security group for Ansible EC2 Instances."
+        region: us-east-1
+        rules:
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 20.0.0.0/24
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 20.0.0.0/24
+          - proto: tcp
+            from_port: 443
+            to_port: 443
+            cidr_ip: 20.0.0.0/24
+      register: sec_grp
+...
