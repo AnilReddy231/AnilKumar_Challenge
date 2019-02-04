@@ -1,67 +1,53 @@
 ---
-# Installs and configures Apache web server and default virtual hosts
+# Include variables and define needed variables.
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
 
-# Core configuration
+- name: Include variables for Amazon Linux.
+  include_vars: "AmazonLinux.yml"
+  when:
+    - ansible_distribution == "Amazon"
+    - ansible_distribution_major_version == "NA"
 
-- include: install-apache.yml
+- name: Define apache_packages.
+  set_fact:
+    apache_packages: "{{ __apache_packages | list }}"
+  when: apache_packages is not defined
 
-- include: configure-apache.yml
+# Setup/install tasks.
+- include_tasks: "setup-{{ ansible_os_family }}.yml"
 
-# Hello World
-- name: Creating Hello World Page on the launched instance
-  copy:
-    content: |
-      <html>
-      <head>
-      <title>Hello World</title>
-      </head>
-      <body>
-      <h1>Hello World!</h1>
-      </body>
-      </html>
-    dest: /var/www/html/index.html
-    mode: 0644
+- name: Create Self-signed certificates
+  include_tasks: create-selfsigned.yml
 
-# Security
+# Figure out what version of Apache is installed.
+- name: Get installed version of Apache.
+  command: "{{ apache_daemon_path }}{{ apache_daemon }} -v"
+  changed_when: false
+  check_mode: false
+  register: _apache_version
 
-- include: configure-ufw.yml
-  when: apache_enable_feature_configure_ufw == true
+- name: Create apache_version variable.
+  set_fact:
+    apache_version: "{{ _apache_version.stdout.split()[2].split('/')[1] }}"
 
-# Additional configuration
+- name: Include Apache 2.2 variables.
+  include_vars: apache-22.yml
+  when: "apache_version.split('.')[1] == '2'"
 
-- include: disable-default-configs.yml
-  when: apache_enable_feature_disable_default_configs == true
+- name: Include Apache 2.4 variables.
+  include_vars: apache-24.yml
+  when: "apache_version.split('.')[1] == '4'"
 
-- include: remove-default-content.yml
-  when: apache_enable_feature_remove_default_document_root_content == true
+# Configure Apache.
+- name: Configure Apache.
+  include_tasks: "configure-{{ ansible_os_family }}.yml"
 
-- include: configure-ssl.yml
-  when: apache_enable_feature_ssl == true or apache_enable_feature_ssl == "True"
+- name: Configure Home Page
+  include_tasks: hello-world.yml
 
-- include: app-user.yml
-
-# Virtual hosts
-
-- include: disable-default-apache-virtualhost.yml
-  when: apache_enable_feature_disable_default_apache_virtual_host == true or apache_enable_feature_disable_default_apache_virtual_host == "True"
-
-
-- include: configure-default-http-virtualhost.yml
-  when: apache_enable_feature_default_http_virtualhost == true or apache_enable_feature_default_http_virtualhost == "True"
-
-- include: disable-default-http-virtualhost.yml
-  when: (apache_enable_feature_default_http_virtualhost == false or apache_enable_feature_default_http_virtualhost == "False")
-
-
-- include: configure-default-https-virtualhost.yml
-  when: apache_enable_feature_default_https_virtualhost == true or apache_enable_feature_default_https_virtualhost == "True"
-
-- include: disable-default-https-virtualhost.yml
-  when: apache_enable_feature_default_https_virtualhost == false or apache_enable_feature_default_https_virtualhost == "False"
-
-
-- include: configure-redirect-http-https-virtualhost.yml
-  when: apache_enable_feature_upgrade_http_to_https == true or apache_enable_feature_upgrade_http_to_https == "True"
-
-- include: disable-redirect-http-https-virtualhost.yml
-  when: (apache_enable_feature_upgrade_http_to_https == false or apache_enable_feature_upgrade_http_to_https == "False")
+- name: Ensure Apache has selected state and enabled on boot.
+  service:
+    name: "{{ apache_service }}"
+    state: "{{ apache_state }}"
+    enabled: true

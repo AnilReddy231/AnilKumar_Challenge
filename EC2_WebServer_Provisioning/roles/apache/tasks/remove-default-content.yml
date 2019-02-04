@@ -1,5 +1,0 @@
----
-# Remove default Apache content
-
-- name: remove default content
-  file: path=/var/www/html state=absent

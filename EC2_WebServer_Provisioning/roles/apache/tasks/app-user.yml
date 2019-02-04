@@ -1,8 +1,0 @@
----
-# Configure Apache for use with app user
-
-- name: add httpadm user to webserver group
-  user: name="{{ apache_app_user_username }}" groups=www-data
-
-- name: assign ownership of default document root to httpadm user
-  file: path=/var/www owner="{{ apache_app_user_username }}" group=www-data recurse=yes
