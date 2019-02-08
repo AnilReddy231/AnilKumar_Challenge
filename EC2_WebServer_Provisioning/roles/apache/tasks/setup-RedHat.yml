@@ -1,6 +1,7 @@
 ---
 - name: Ensure Apache is installed on RHEL.
   package:
-    name: "{{ apache_packages }}"
+    name: "{{apache_packages}}"
+#    name: "{{ item }}"
     state: "{{ apache_packages_state }}"
-    enablerepo: "{{ apache_enablerepo | default(omit, true) }}"
+#  with_items: "{{apache_packages}}"

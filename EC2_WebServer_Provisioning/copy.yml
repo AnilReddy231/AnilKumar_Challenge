@@ -1,0 +1,28 @@
+---
+- name: Privisioning EC2 Instance
+  hosts: 100.25.201.35 
+  gather_facts: false
+  pre_tasks:
+    - include_vars: vars/samp.yml
+  tasks:
+          # create users for us
+          # note user vivek added to sudo group 
+          # on many system you may need to use wheel 
+          # user in sudo or wheel group can sudo
+          - name: create ansible user
+            user: 
+              name: "{{ ansible_user }}" 
+              createhome: yes 
+              state: present 
+              register: ansibleusr
+
+          - name: generate random password for user only on creation
+            shell: /usr/bin/openssl rand -base64 32 | passwd --stdin "{{ ansible_user }}"
+            when: ansibleusr.changed
+          
+          # upload ssh key                
+          - authorized_key:
+                  user: "{{ ansible_user }}"
+                  state: present
+                  manage_dir: yes
+                  key: "{{ lookup('file', '~./.ssh/id_rsa.pub') }}"

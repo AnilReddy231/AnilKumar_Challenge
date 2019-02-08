@@ -1,0 +1,15 @@
+---
+- hosts: 35.174.200.27 
+  sudo: yes
+  vars:
+    apache_packages:
+      - httpd 
+      - httpd-devel
+  tasks:
+    - name: install apache
+      package: 
+        name={{item}}
+        update_cache=yes
+        state=present
+      with_items: "{{apache_packages}}"
+...

@@ -9,6 +9,22 @@
   tasks:
     - name: running another playbook
       include: ec2_scg_playbook.yml
+
+    - name: Create an EC2 key
+      ec2_key:
+        name: "{{ ec2_keypair }}" 
+        region: "{{ ec2_region }}"
+      register: ec2_key
+
+    - name: save private key
+      copy: content="{{ ec2_key.key.private_key }}" dest="~/.ssh/aws-{{ env }}-private.pem" mode=0600
+      when: ec2_key.changed
+
+    - name: load pem files 
+      shell: ssh-add {{item}} 
+      with_fileglob:
+        - "~/.ssh/*.pem"
+
     - name: Provisioning {{ ec2_count }} instance(s)
       local_action:
         module: ec2
@@ -46,9 +62,11 @@
 
 - name: Installing Apache Webserver
   hosts: launched
-  become: true
-  become_method: sudo
-  gather_facts: false
+#  become: true
+#  become_method: sudo
+#  gather_facts: false
+  sudo: yes
   roles:
-    - apache_webserver 
+    - apache
 ...
+

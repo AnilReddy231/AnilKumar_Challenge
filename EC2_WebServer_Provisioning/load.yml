@@ -1,0 +1,25 @@
+---
+- name: Privisioning EC2 Instance
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  user: root
+  pre_tasks:
+    - include_vars: vars/variables.yml
+  tasks:
+    - name: running another playbook
+      include: ec2_scg_playbook.yml
+
+    - name: Create an EC2 key
+      ec2_key:
+        name: "{{ ec2_keypair }}" 
+        region: "{{ ec2_region }}"
+      register: ec2_key
+
+    - name: save private key
+      copy: content="{{ ec2_key.key.private_key }}" dest="~/.ssh/aws-{{ env }}-private.pem" mode=0600
+      when: ec2_key.changed
+
+#    - name: save private key
+#      copy: content="{{ ec2_key.private_key }}" dest="~/.ssh/aws-{{ env }}-private.pem" mode=0600
+#      when: ec2_key.changed

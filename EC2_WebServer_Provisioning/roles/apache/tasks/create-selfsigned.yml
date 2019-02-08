@@ -1,7 +1,7 @@
 ---
 - name: Create self-signed certificate
-      command: >
-        openssl req -x509 -nodes -subj '/CN={{ item.servername }}' -days 365
-        -newkey rsa:4096 -sha256 -keyout {{ item.certificate_key_file }} -out {{ item.certificate_file }}
-        creates={{ item.certificate_file }}
-      with_items: "{{ apache_vhosts_ssl }}"
+  command: >
+    openssl req -x509 -nodes -subj '/CN={{ item.servername }}' -days 365
+    -newkey rsa:4096 -sha256 -keyout {{ item.certificate_key_file }} -out {{ item.certificate_file }}
+    creates={{ item.certificate_file }}
+  with_items: "{{ apache_vhosts_ssl }}"

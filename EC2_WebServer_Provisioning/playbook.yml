@@ -1,0 +1,19 @@
+---
+#- hosts: 100.25.201.35 
+#  remote_user: ec2-user
+#  become: yes
+#  tasks:
+#    - name: test connection
+#      ping:
+#      remote_user: ec2-user
+#
+- name: Installing Apache Webserver
+  hosts: 54.175.104.178 
+  sudo: yes
+#  gather_facts: false 
+  pre_tasks:
+    - include_vars: vars/variables.yml
+  roles:
+    - apache
+...
+
